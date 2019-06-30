@@ -1,0 +1,259 @@
+# import ProductOrderByInput from './generated/prisma.graphql'
+
+type Query {
+  attributes: [Attribute!]!
+  attribute(id: ID!): Attribute!
+
+  cart(id: String!): Cart!
+
+  categories: [Category!]!
+  category(id: ID!): Category!
+
+  profile(id: ID!): Customer!
+
+  departments: [Department!]!
+  department(id: ID!): Department!
+
+  order(id: ID!): CartItem!
+
+  products(query: String, first: Int, skip: Int, after: String, orderBy: ProductOrderByInput): [Product!]!
+  product(id: ID!): Product!
+
+  shippingRegions: [ShippingRegion]!
+  shippingRegion(id: ID!): ShippingRegion!
+
+  taxes: [Tax!]!
+  tax(id: ID!): Tax!
+}
+
+type Mutation {
+  # cart
+  addItemToCart(data: AddItemToCartInput): Cart!
+  emptyCart(id: ID!): itemCount!
+  createCart: Cart!
+  removeCartItem(data: RemoveCartItemInput): Cart!
+  updateCartItem(data: UpdateCartItemInput): Cart!
+
+  # customer
+  signup(data: CreateCustomerInput!): AuthPayload!
+  login(data: LoginCustomerInput!): AuthPayload!
+  loginFacebook(token: String!): AuthPayload!
+  updateCustomer(data: UpdateCustomerInput!): Customer!
+
+  # order
+  createOrder(data: CreateOrderInput!): Order!
+
+  # review
+  createReview(data: CreateReviewInput!): Review!
+}
+
+
+## custom input types
+
+# cart
+input AddItemToCartInput {
+    cartId: String!
+    productId: Int!
+    attributes: String
+}
+
+input UpdateCartItemInput {
+    cartId: ID!
+    itemId: Int!
+    quantity: Int!
+}
+
+input RemoveCartItemInput {
+    itemId: Int!
+    cartId: ID!
+}
+
+
+# customer
+input CreateCustomerInput {
+    name: String!
+    email: String!
+    password: String!
+}
+
+input LoginCustomerInput {
+    email: String!
+    password: String!
+}
+
+input UpdateCustomerInput {
+    address1: String
+    address2: String
+    city: String
+    country: String
+    creditCard: String
+    dayPhone: String
+    email: String
+    evePhone: String
+    mobPhone: String
+    name: String
+    password: String
+    postalCode: String
+    region: String
+}
+
+# order
+input CreateOrderInput {
+  cartId: ID!
+  shippingId: Int!
+  taxId: Int!
+}
+
+# review
+input CreateReviewInput {
+  productId: Int!
+  rating: Int!
+  review: String
+}
+
+
+## custom types
+
+type Attribute {
+  id: ID!
+  values: [AttributeValue!]!
+  name: String!
+}
+
+type AttributeValue {
+  id: ID!
+  attribute: Attribute!
+  products: [Product!]!
+  value: String!
+}
+
+type Audit {
+  id: ID!
+  code: Int!
+  createdOn: String!
+  message: String!
+  order: Order!
+}
+
+type Category {
+  id: ID!
+  department: Department!
+  description: String!
+  name: String!
+  products: [Product!]!
+}
+
+type Customer {
+  id: ID!
+  address1: String
+  address2: String
+  city: String
+  country: String
+  creditCard: String
+  dayPhone: String
+  email: String
+  evePhone: String
+  mobPhone: String
+  name: String!
+  orders: [Order!]
+  password: String
+  postalCode: String
+  region: String
+  reviews: [Review!]!
+  shippingRegion: ShippingRegion
+  carts: [Cart!]
+}
+
+type Department {
+  id: ID!
+  categories: [Category!]!
+  description: String!
+  name: String!
+}
+
+type Order {
+  id: ID!
+  audits: [Audit!]
+  authCode: String
+  cart: Cart!
+  comments: String
+  createdAt: String
+  customer: Customer!
+  references: String
+  shippedOn: String
+  shippingDetails: Shipping!
+  status: Int
+  tax: Tax!
+}
+
+type CartItem {
+  id: ID!
+  attribute: String
+  cart: Cart!
+  product: Product!
+  quantity: Int!
+  price: Float!
+}
+
+type Product {
+  id: ID!
+  description: String!
+  discountedPrice: Float
+  display: Int
+  image: String!
+  image2: String
+  name: String!
+  cartsPresentIn: [CartItem!]!
+  price: Float!
+  attributes: [AttributeValue!]!
+  categories: [Category!]!
+  reviews: [Review!]!
+  thumbnail: String!
+}
+
+type Review {
+  id: ID!
+  createdAt: String!
+  customer: Customer!
+  product: Product!
+  rating: Int!
+  review: String
+}
+
+type Shipping {
+  id: ID!
+  orders: [Order!]!
+  cost: Float!
+  region: ShippingRegion!
+  type: String!
+}
+
+type ShippingRegion {
+  id: ID!
+  customers: [Customer!]! 
+  shippings: [Shipping!]!
+  name: String!
+}
+
+type Cart {
+  id: String!
+  owner: Customer!
+  items: [CartItem!]!
+  orders: [Order!]!
+}
+
+type Tax {
+  id: ID!
+  orders: [Order!]!
+  percentage: Float!
+  type: String!
+}
+
+type AuthPayload {
+  customer: Customer!
+  token: String!
+}
+
+type itemCount {
+  count: Int!
+}

@@ -1,0 +1,134 @@
+type Attribute @db(name: "attribute") {
+  id: ID! @id @unique
+  values: [AttributeValue!]! @relation(name: "AttributeToAttributeValue", onDelete: CASCADE)
+  name: String!
+}
+
+type AttributeValue @db(name: "attribute_value") {
+  id: ID! @id @unique
+  attribute: Attribute! @db(name: "attribute_id") @relation(name: "AttributeToAttributeValue", onDelete: SET_NULL)
+  products: [Product!]!
+  value: String!
+}
+
+type Audit @db(name: "audit") {
+  id: ID! @id @unique
+  code: Int!
+  createdAt: DateTime! @createdAt @db(name: "created_on")
+  message: String!
+  order: Order! @db(name: "order_id") @relation(name: "OrderToAudit", onDelete: SET_NULL)
+}
+
+type Category @db(name: "category") {
+  id: ID! @id @unique
+  department: Department! @db(name: "department_id") @relation(name: "DepartmentToCategory", onDelete: SET_NULL)
+  description: String!
+  name: String!
+  products: [Product!]!
+}
+
+type Customer @db(name: "customer") {
+  id: ID! @id @unique
+  address1: String @db(name: "address_1")
+  address2: String @db(name: "address_2")
+  city: String
+  country: String
+  creditCard: String @db(name: "credit_card")
+  dayPhone: String @db(name: "day_phone")
+  email: String! @unique
+  evePhone: String @db(name: "eve_phone")
+  mobPhone: String @db(name: "mob_phone")
+  name: String!
+  orders: [Order!]! @relation(name: "CustomerToOrder", onDelete: CASCADE)
+  password: String!
+  postalCode: String @db(name: "postal_code")
+  region: String
+  reviews: [Review!]! @relation(name: "CustomerToReview", onDelete: CASCADE)
+  shippingRegion: ShippingRegion @db(name: "shipping_region_id")
+  carts: [Cart!]! @relation(name: "CustomerToCart", onDelete: CASCADE)
+}
+
+type Department @db(name: "department") {
+  id: ID! @id @unique
+  categories: [Category!]! @relation(name: "DepartmentToCategory", onDelete: CASCADE)
+  description: String!
+  name: String!
+}
+
+type Order @db(name: "orders") {
+  id: ID! @id @unique
+  audits: [Audit!] @relation(name: "OrderToAudit", onDelete: CASCADE)
+  authCode: String @db(name: "auth_code")
+  cart: Cart! @db(name: "cart_id")
+  comments: String
+  createdAt: DateTime! @createdAt @db(name: "created_on")
+  customer: Customer! @db(name: "customer_id") @relation(name: "CustomerToOrder", onDelete: SET_NULL)
+  references: String
+  shippedOn: DateTime @db(name: "shipped_on")
+  shippingDetails: Shipping! @db(name: "shipping_id") @relation(name: "ShippingToOrder", onDelete: SET_NULL)
+  status: Int! @default(value: 0)
+  tax: Tax! @db(name: "tax_id") @relation(name: "TaxToOrder", onDelete: SET_NULL)
+}
+
+type CartItem @db(name: "order_detail") {
+  id: ID! @id @unique
+  attribute: String
+  cart: Cart! @db(name: "cart_id") @relation(name: "CartToCartItem", onDelete: SET_NULL)
+  product: Product! @db(name: "product_id") @relation(name: "ProductToCartItem", onDelete: SET_NULL)
+  quantity: Int! @default(value: 1)
+  price: Float! @db(name: "unit_cost")
+}
+
+type Product @db(name: "product") {
+  id: ID! @id @unique
+  description: String!
+  discountedPrice: Float @db(name: "discounted_price") @default(value: 0.00)
+  display: Int @default(value: 0)
+  image: String!
+  image2: String @db(name: "image_2")
+  name: String!
+  cartsPresentIn: [CartItem!]! @relation(name: "ProductToCartItem", onDelete: CASCADE)
+  price: Float!
+  attributes: [AttributeValue!]!
+  categories: [Category!]!
+  reviews: [Review!]! @relation(name: "ProductToReview", onDelete: CASCADE)
+  thumbnail: String!
+}
+
+type Review @db(name: "review") {
+  id: ID! @id @unique
+  createdAt: DateTime! @createdAt @db(name: "created_on")
+  customer: Customer! @db(name: "customer_id") @relation(name: "CustomerToReview", onDelete: SET_NULL)
+  product: Product! @db(name: "product_id") @relation(name: "ProductToReview", onDelete: SET_NULL)
+  rating: Int!
+  review: String
+}
+
+type Shipping @db(name: "shipping") {
+  id: ID! @id @unique
+  orders: [Order!]! @relation(name: "ShippingToOrder", onDelete: CASCADE)
+  cost: Float! @db(name: "shipping_cost")
+  region: ShippingRegion! @db(name: "shipping_region_id") @relation(name: "ShippingRegionToShipping", onDelete: SET_NULL)
+  type: String! @db(name: "shipping_type")
+}
+
+type ShippingRegion @db(name: "shipping_region") {
+  id: ID! @id @unique
+  customers: [Customer!]! 
+  shipping: [Shipping!]! @relation(name: "ShippingRegionToShipping", onDelete: CASCADE)
+  name: String!
+}
+
+type Cart @db(name: "shopping_cart") {
+  id: ID! @id @unique
+  owner: Customer! @db(name: "customer_id") @relation(name: "CustomerToCart", onDelete: SET_NULL)
+  items: [CartItem!]! @relation(name: "CartToCartItem", onDelete: CASCADE)
+  orders: [Order!]!
+}
+
+type Tax @db(name: "tax") {
+  id: ID! @id @unique
+  orders: [Order!]! @relation(name: "TaxToOrder", onDelete: CASCADE)
+  percentage: Float! @db(name: "tax_percentage")
+  type: String! @db(name: "tax_type")
+}
