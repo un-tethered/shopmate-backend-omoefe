@@ -1,5 +1,7 @@
 import { verify, sign } from 'jsonwebtoken'
 
+const secret = process.env.JWT_SECRET
+
 export const getUserFromToken = ({ headers: { authorization: tokenString } }) => {
   try {
     if (!tokenString) {
@@ -8,7 +10,7 @@ export const getUserFromToken = ({ headers: { authorization: tokenString } }) =>
 
     const token = tokenString.split(' ').pop()
 
-    const user = verify(token, 'dragon')
+    const user = verify(token, secret)
 
     return user
   } catch (error) {
@@ -16,4 +18,4 @@ export const getUserFromToken = ({ headers: { authorization: tokenString } }) =>
   }
 }
 
-export const signToken = payload => sign(payload, 'dragon', { expiresIn: '7 days' })
+export const signToken = payload => sign(payload, secret, { expiresIn: '7 days' })
