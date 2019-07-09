@@ -16,7 +16,17 @@ type Query {
 
   order(id: ID!): CartItem!
 
-  products(query: String, first: Int, skip: Int, after: String, orderBy: ProductOrderByInput): [Product!]!
+  products(
+    query: String,
+    category: CategoryName,
+    first: Int,
+    skip: Int,
+    after: String,
+    orderBy: ProductOrderByInput,
+    colors: [String!],
+    sizes: [String!],
+    priceRange: [Int!],
+  ): PaginatedProducts!
   product(id: ID!): Product!
 
   shippingRegions: [ShippingRegion]!
@@ -29,7 +39,7 @@ type Query {
 type Mutation {
   # cart
   addItemToCart(data: AddItemToCartInput): Cart!
-  emptyCart(id: ID!): itemCount!
+  emptyCart(id: ID!): ItemCount!
   createCart: Cart!
   removeCartItem(data: RemoveCartItemInput): Cart!
   updateCartItem(data: UpdateCartItemInput): Cart!
@@ -211,6 +221,29 @@ type Product {
   thumbnail: String!
 }
 
+type ProductCardAttributes {
+  color: [String!]!
+  size: [String!]!
+}
+
+type ProductCardRating {
+  value: Int!
+  count: Int!
+}
+
+type ProductCard {
+  id: ID!
+  description: String!
+  discountedPrice: Float
+  display: Int
+  image: String!
+  name: String!
+  price: Float!
+  attributes: ProductCardAttributes!
+  rating: ProductCardRating
+  thumbnail: String!
+}
+
 type Review {
   id: ID!
   createdAt: String!
@@ -254,6 +287,24 @@ type AuthPayload {
   token: String!
 }
 
-type itemCount {
+type ItemCount {
   count: Int!
+}
+
+type PaginatedProducts {
+  hasNext: Boolean!
+  startCursor: String
+  endCursor: String
+  products: [ProductCard!]!
+  count: Int!
+}
+
+enum CategoryName {
+  french
+  italian
+  irish
+  animal
+  flower
+  christmas
+  valentines
 }
